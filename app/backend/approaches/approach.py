@@ -1,5 +1,5 @@
 import os
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from urllib.parse import urljoin
 import aiohttp
@@ -97,6 +97,14 @@ class ThoughtStep:
 
 
 class Approach(ABC):
+    """
+    Clase base abstracta para implementar diferentes enfoques de RAG.
+
+    Métodos:
+        run(messages: List[Dict[str, Any]], context: Dict[str, Any], session_state: Dict[str, Any]) -> Dict[str, Any]:
+            Método abstracto que debe ser implementado por las clases derivadas para procesar 
+            las solicitudes del usuario y devolver una respuesta.
+    """
     def __init__(
         self,
         search_client: SearchClient,
@@ -280,10 +288,22 @@ class Approach(ABC):
                 image_query_vector = json["vector"]
         return VectorizedQuery(vector=image_query_vector, k_nearest_neighbors=50, fields="imageEmbedding")
 
+    @abstractmethod
     async def run(
-        self, messages: list[dict], stream: bool = False, session_state: Any = None, context: dict[str, Any] = {}
-    ) -> Union[dict[str, Any], AsyncGenerator[dict[str, Any], None]]:
+        self,
+        messages: List[Dict[str, Any]],
+        context: Dict[str, Any],
+        session_state: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """
-        Runs the approach based on the given messages.
+        Procesa las solicitudes del usuario y devuelve una respuesta.
+
+        Args:
+            messages (List[Dict[str, Any]]): Lista de mensajes de entrada, incluyendo el historial de conversación.
+            context (Dict[str, Any]): Contexto adicional para personalizar el procesamiento.
+            session_state (Dict[str, Any]): Estado de la sesión actual.
+
+        Returns:
+            Dict[str, Any]: Respuesta generada basada en el enfoque implementado.
         """
-        raise NotImplementedError
+        pass
